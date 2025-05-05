@@ -33,21 +33,23 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Router>
-          <div className="flex flex-col min-h-screen">
+          <div className="flex flex-col min-h-screen w-full">
             <Header />
-            <main className="flex-grow container mx-auto px-4 py-8">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/loops/create" element={<CreateLoop />} />
-                <Route path="/loops/:loopId" element={<LoopDetail />} />
-                <Route path="/loops/:loopId/edit" element={<EditLoop />} />
-                <Route path="/leaderboard" element={<Leaderboard />} />
-                <Route path="/friends" element={<Friends />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
+            <main className="flex-grow w-full">
+              <div className="container mx-auto px-4 py-8">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/loops/create" element={<CreateLoop />} />
+                  <Route path="/loops/:loopId" element={<LoopDetail />} />
+                  <Route path="/loops/:loopId/edit" element={<EditLoop />} />
+                  <Route path="/leaderboard" element={<Leaderboard />} />
+                  <Route path="/friends" element={<Friends />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </div>
             </main>
             <Footer />
           </div>

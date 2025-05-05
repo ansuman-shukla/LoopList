@@ -289,7 +289,7 @@ const Home = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="w-full max-w-5xl mx-auto">
       {isAuthenticated ? renderAuthenticatedContent() : renderUnauthenticatedContent()}
     </div>
   );
