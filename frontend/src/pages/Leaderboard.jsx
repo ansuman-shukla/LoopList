@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
-import { getLeaderboard, reactToLoop, cloneLoop } from '../api/public';
+import { getTopStreaks, reactToLoop, cloneLoop } from '../api/public';
 import { useAuth } from '../hooks/useAuth';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
@@ -17,8 +17,8 @@ const Leaderboard = () => {
   const [hasMore, setHasMore] = useState(true);
 
   const { data: loops, isLoading, error, isFetching } = useQuery({
-    queryKey: ['leaderboard', page],
-    queryFn: () => getLeaderboard(page * limit, limit),
+    queryKey: ['top-streaks', page],
+    queryFn: () => getTopStreaks(page * limit, limit),
     staleTime: 1000 * 60 * 5, // 5 minutes
     keepPreviousData: true,
   });
@@ -233,7 +233,7 @@ const Leaderboard = () => {
       }
 
       // Invalidate queries to refresh data
-      queryClient.invalidateQueries(['leaderboard']);
+      queryClient.invalidateQueries(['top-streaks']);
       queryClient.invalidateQueries(['loops']);
     } catch (error) {
       console.error('Error cloning loop:', error);

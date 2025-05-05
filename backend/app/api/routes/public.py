@@ -111,7 +111,7 @@ async def get_leaderboard(
     current_user: User = Depends(get_current_user)
 ) -> Any:
     """
-    Get the top loops with the highest current_streak, respecting visibility settings.
+    Get the public loop boards for the home feed.
     Only returns:
     - Public loops from other users (not the current user)
     - Friends-only loops where the current user is a friend of the loop owner
@@ -221,6 +221,121 @@ async def get_leaderboard(
 
     print(f"Returning {len(result_loops)} loops for leaderboard")
     print("=== LEADERBOARD ENDPOINT END ===\n")
+    return result_loops
+
+@router.get("/top-streaks", response_model=List[Loop])
+async def get_top_streaks(
+    skip: int = 0,
+    limit: int = 10,  # Fixed limit to 10
+    current_user: User = Depends(get_current_user)
+) -> Any:
+    """
+    Get the top 10 loops with the longest active streaks.
+    Includes:
+    - Public loops from all users (including the current user)
+    - Friends-only loops where the current user is a friend of the loop owner
+
+    Note: This endpoint is specifically for the Leaderboard page.
+    """
+    print("\n=== TOP STREAKS ENDPOINT START ===")
+    print(f"Getting top streaks for user: {current_user.id}")
+
+    # Get current user's friend IDs
+    friend_ids = []
+    try:
+        db_user = await db.db.users.find_one({"_id": ObjectId(current_user.id)})
+        if db_user and "friend_ids" in db_user:
+            friend_ids = [ObjectId(fid) for fid in db_user.get("friend_ids", [])]
+            print(f"Found {len(friend_ids)} friends for user {current_user.id}")
+    except Exception as e:
+        print(f"Error getting user's friends: {str(e)}")
+
+    # Build a query that includes all public loops and friends-only loops from friends
+    # First, filter out the current user's ID from the friend_ids list
+    friend_ids_without_current_user = [fid for fid in friend_ids if str(fid) != str(current_user.id)]
+    print(f"Friend IDs without current user: {friend_ids_without_current_user}")
+
+    query = {
+        "status": StatusType.ACTIVE,
+        "$or": [
+            # All public loops (including the current user's)
+            {
+                "visibility": VisibilityType.PUBLIC
+            },
+
+            # Friends-only loops from friends (excluding the current user)
+            {
+                "visibility": VisibilityType.FRIENDS_ONLY,
+                "user_id": {"$in": friend_ids_without_current_user}
+            }
+        ]
+    }
+
+    print(f"Top streaks query: {query}")
+
+    # Get the top 10 loops with highest current_streak
+    loops = await db.db.loops.find(query).sort("current_streak", -1).limit(limit).to_list(length=limit)
+
+    # Enhance loops with reaction counts and user information
+    result_loops = []
+    for loop in loops:
+        # Get total reaction count for this loop using flexible query
+        loop_id = loop["_id"]
+        flexible_query = {
+            "$or": [
+                {"loop_id": loop_id},
+                {"loop_id": str(loop_id)}
+            ]
+        }
+        reaction_count = await db.db.reactions.count_documents(flexible_query)
+        print(f"get_top_streaks: Found {reaction_count} reactions for loop {loop_id} using flexible query")
+
+        # CRITICAL FIX: Ensure reaction count is at least the stored value
+        current_count = loop.get("reaction_count", 0)
+        final_count = max(reaction_count, current_count)
+        print(f"get_top_streaks: Current count in DB: {current_count}, Final count: {final_count}")
+
+        # Add the reaction count to the loop
+        loop["reaction_count"] = final_count
+
+        # Update the stored count if it's different
+        if final_count != current_count:
+            print(f"Updating stored reaction count for loop {loop['_id']} from {current_count} to {final_count}")
+            await db.db.loops.update_one(
+                {"_id": loop["_id"]},
+                {"$set": {"reaction_count": final_count}}
+            )
+
+        # Get the user information for this loop
+        user_id = loop.get("user_id")
+        if user_id:
+            try:
+                # Convert to ObjectId if it's a string
+                if isinstance(user_id, str) and ObjectId.is_valid(user_id):
+                    user_id = ObjectId(user_id)
+
+                # Look up the user in the database
+                user = await db.db.users.find_one({"_id": user_id})
+                if user and user.get("username"):
+                    # Add the username to the loop
+                    loop["user_username"] = user.get("username")
+                    print(f"Added username '{user.get('username')}' to loop {loop_id}")
+                else:
+                    # If user not found or no username, use a default
+                    loop["user_username"] = "Anonymous"
+                    print(f"User not found or no username for user_id {user_id}, using 'Anonymous'")
+            except Exception as e:
+                print(f"Error getting user information for loop {loop_id}: {str(e)}")
+                loop["user_username"] = "Anonymous"
+        else:
+            loop["user_username"] = "Anonymous"
+            print(f"No user_id found for loop {loop_id}, using 'Anonymous'")
+
+        # Add to result
+        result_loops.append(Loop(**loop))
+
+    print(f"Returning {len(result_loops)} loops for top streaks")
+    print("=== TOP STREAKS ENDPOINT END ===\n")
     return result_loops
 
 @router.post("/loops/{loop_id}/react", response_model=int)

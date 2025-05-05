@@ -1,8 +1,25 @@
 import axiosInstance from './axios';
 
-// Get the top 10 loops with highest current_streak
+// Get loops for the home feed (public loops from other users and friends-only loops from friends)
 export const getLeaderboard = async (skip = 0, limit = 10) => {
   const response = await axiosInstance.get('/public/leaderboard', {
+    params: { skip, limit }
+  });
+
+  // Process the data to ensure each loop has an id property
+  const loops = response.data;
+  return loops.map(loop => {
+    // If loop has _id but no id, add id property
+    if (loop._id && !loop.id) {
+      return { ...loop, id: loop._id };
+    }
+    return loop;
+  });
+};
+
+// Get the top 10 loops with the longest active streaks for the leaderboard page
+export const getTopStreaks = async (skip = 0, limit = 10) => {
+  const response = await axiosInstance.get('/public/top-streaks', {
     params: { skip, limit }
   });
 
