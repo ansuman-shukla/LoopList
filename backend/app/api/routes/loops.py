@@ -1,5 +1,5 @@
 from typing import Any, List, Optional
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timezone, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Query, Path
 from bson import ObjectId
 
@@ -22,6 +22,11 @@ async def create_loop(
     # Set default start_date to today if not provided
     if not loop_in.start_date:
         loop_in.start_date = date.today()
+
+    # For x_times_per_week frequency, set end_date to one week after start_date if not provided
+    if loop_in.frequency_type == "x_times_per_week" and not loop_in.end_date:
+        loop_in.end_date = loop_in.start_date + timedelta(days=7)
+        print(f"Setting end_date to one week after start_date for x_times_per_week frequency: {loop_in.end_date}")
 
     # Create the loop - handle Pydantic v2 compatibility
     try:
@@ -351,6 +356,25 @@ async def update_loop(
     except AttributeError:
         # Fallback for older Pydantic versions
         update_data = loop_in.dict(exclude_unset=True)
+
+    # For x_times_per_week frequency, set end_date to one week after start_date
+    if 'frequency_type' in update_data and update_data['frequency_type'] == "x_times_per_week":
+        # If start_date is being updated, use that, otherwise use the existing start_date
+        start_date = None
+        if 'start_date' in update_data:
+            if isinstance(update_data['start_date'], str):
+                start_date = date.fromisoformat(update_data['start_date'])
+            else:
+                start_date = update_data['start_date']
+        else:
+            # Use existing start_date from the loop
+            existing_start_date = loop.get('start_date')
+            if isinstance(existing_start_date, str):
+                start_date = date.fromisoformat(existing_start_date)
+
+        if start_date:
+            update_data['end_date'] = start_date + timedelta(days=7)
+            print(f"Setting end_date to one week after start_date for x_times_per_week frequency: {update_data['end_date']}")
 
     update_data["updated_at"] = datetime.now(timezone.utc)
 

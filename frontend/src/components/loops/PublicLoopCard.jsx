@@ -4,6 +4,7 @@ import Card from '../common/Card';
 import Button from '../common/Button';
 import { reactToLoop } from '../../api/public';
 import LoopStateIndicator from './LoopStateIndicator';
+import { useCompletionCount } from '../../hooks/useLoops';
 
 const FIRE_HEART_EMOJI = "❤️‍🔥";
 
@@ -14,6 +15,9 @@ const PublicLoopCard = ({ loop, onClone }) => {
   const [reactionCount, setReactionCount] = useState(0);
   const reactionCountRef = useRef(0); // Reference to track reaction count across renders
   const navigate = useNavigate();
+
+  // Get completion count for x_times_per_week frequency
+  const { data: completionCount = 0 } = useCompletionCount(loop?.id || loop?._id);
 
   // Return early if loop is undefined
   if (!loop) {
@@ -309,12 +313,25 @@ const PublicLoopCard = ({ loop, onClone }) => {
               </span>
             )}
           </div>
-          <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">
-            {current_streak}
-          </div>
-          <div className="text-xs text-gray-500 dark:text-gray-500">
-            day streak
-          </div>
+          {frequency_type === 'x_times_per_week' ? (
+            <>
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                {completionCount}
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-500">
+                times total
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="text-2xl font-bold text-primary-600 dark:text-primary-400">
+                {current_streak}
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-500">
+                day streak
+              </div>
+            </>
+          )}
         </div>
       </div>
 

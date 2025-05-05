@@ -4,6 +4,7 @@ import Card from '../common/Card';
 import Button from '../common/Button';
 import { reactToLoop } from '../../api/public';
 import LoopStateIndicator from './LoopStateIndicator';
+import { useCompletionCount } from '../../hooks/useLoops';
 
 const FIRE_HEART_EMOJI = "❤️‍🔥";
 
@@ -12,6 +13,9 @@ const LoopCard = ({ loop, onComplete, isPublic = false, showReactions = true }) 
   const [selectedEmoji, setSelectedEmoji] = useState(null);
   const [reactionCount, setReactionCount] = useState(0);
   const reactionCountRef = useRef(0); // Reference to track reaction count across renders
+
+  // Get completion count for x_times_per_week frequency
+  const { data: completionCount = 0 } = useCompletionCount(loop?.id || loop?._id)
 
   // Return early if loop is undefined
   if (!loop) {
@@ -303,14 +307,23 @@ const LoopCard = ({ loop, onComplete, isPublic = false, showReactions = true }) 
       </div>
 
       <div className="flex justify-between mb-4">
-        <div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Current Streak</p>
-          <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">{current_streak}</p>
-        </div>
-        <div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Longest Streak</p>
-          <p className="text-2xl font-bold text-secondary-600 dark:text-secondary-400">{longest_streak}</p>
-        </div>
+        {frequency_type === 'x_times_per_week' ? (
+          <div className="w-full">
+            <p className="text-sm text-gray-600 dark:text-gray-400">Completed</p>
+            <p className="text-2xl font-bold text-green-600 dark:text-green-400">{completionCount} times total</p>
+          </div>
+        ) : (
+          <>
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Current Streak</p>
+              <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">{current_streak}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Longest Streak</p>
+              <p className="text-2xl font-bold text-secondary-600 dark:text-secondary-400">{longest_streak}</p>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Emoji Reactions */}

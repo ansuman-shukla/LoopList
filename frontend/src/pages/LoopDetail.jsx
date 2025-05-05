@@ -200,32 +200,47 @@ const LoopDetail = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card className="relative">
-          <div className="absolute top-2 right-2">
-            <span className="text-2xl" title="Current streak">🟩</span>
-          </div>
-          <h3 className="text-lg font-semibold mb-2">Current Streak</h3>
-          <p className="text-4xl font-bold text-primary-600 dark:text-primary-400">{loop.current_streak}</p>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">days</p>
-        </Card>
+        {loop.frequency_type === 'x_times_per_week' ? (
+          <Card className="relative md:col-span-2">
+            <div className="absolute top-2 right-2">
+              <span className="text-2xl" title="Completion count">✅</span>
+            </div>
+            <h3 className="text-lg font-semibold mb-2">Completions</h3>
+            <p className="text-4xl font-bold text-green-600 dark:text-green-400">{completionCount} times total</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              Goal: {loop.frequency_details?.count || 1} times per week
+            </p>
+          </Card>
+        ) : (
+          <>
+            <Card className="relative">
+              <div className="absolute top-2 right-2">
+                <span className="text-2xl" title="Current streak">🟩</span>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Current Streak</h3>
+              <p className="text-4xl font-bold text-primary-600 dark:text-primary-400">{loop.current_streak}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">days</p>
+            </Card>
 
-        <Card className="relative">
-          <div className="absolute top-2 right-2">
-            <span className="text-2xl" title="Longest streak">🔥</span>
-          </div>
-          <h3 className="text-lg font-semibold mb-2">Longest Streak</h3>
-          <p className="text-4xl font-bold text-secondary-600 dark:text-secondary-400">{loop.longest_streak}</p>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">days</p>
-        </Card>
+            <Card className="relative">
+              <div className="absolute top-2 right-2">
+                <span className="text-2xl" title="Longest streak">🔥</span>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Longest Streak</h3>
+              <p className="text-4xl font-bold text-secondary-600 dark:text-secondary-400">{loop.longest_streak}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">days</p>
+            </Card>
 
-        <Card className="relative">
-          <div className="absolute top-2 right-2">
-            <span className="text-2xl" title="Completion count">✅</span>
-          </div>
-          <h3 className="text-lg font-semibold mb-2">Completions</h3>
-          <p className="text-4xl font-bold text-green-600 dark:text-green-400">{completionCount}</p>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">total check-ins</p>
-        </Card>
+            <Card className="relative">
+              <div className="absolute top-2 right-2">
+                <span className="text-2xl" title="Completion count">✅</span>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Completions</h3>
+              <p className="text-4xl font-bold text-green-600 dark:text-green-400">{completionCount}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">total check-ins</p>
+            </Card>
+          </>
+        )}
 
         <Card>
           <h3 className="text-lg font-semibold mb-2">Frequency</h3>

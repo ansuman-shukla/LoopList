@@ -184,23 +184,51 @@ const LoopCalendar = ({ loopId }) => {
 
         // Special handling for x_times_per_week frequency
         if (loop.frequency_type === 'x_times_per_week') {
-          // Only mark days as missed if we're at the end of the week and haven't completed enough times
+          const timesPerWeek = loop.frequency_details?.count || 1;
+
+          // Get the week boundaries for this date
           const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
+          const weekStart = new Date(date);
+          weekStart.setDate(date.getDate() - dayOfWeek); // Go back to Sunday
 
-          // If it's the last day of the week (Saturday) and we're looking at a past week
-          if (dayOfWeek === 6 && date < today) {
-            // Get the week start (Sunday)
-            const weekStart = new Date(date);
-            weekStart.setDate(date.getDate() - 6); // Go back to Sunday
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekStart.getDate() + 6); // Go to Saturday
 
-            // Only mark as missed if the week is after the loop start date
-            if (weekStart >= loopStartDate) {
-              return '!bg-red-600 dark:!bg-red-800 !text-white dark:!text-white';
-            }
+          // Check if this week is in the past
+          const isPastWeek = weekEnd < today;
+
+          // Check if this week is the current week
+          const isCurrentWeek = !isPastWeek && weekStart <= today && weekEnd >= today;
+
+          // Check if this date is after the loop's end date
+          const loopEndDate = loop.end_date ? new Date(loop.end_date) : null;
+          const isAfterEndDate = loopEndDate && date > loopEndDate;
+
+          // If the date is after the end date, mark as inactive
+          if (isAfterEndDate) {
+            return 'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-500 opacity-50';
           }
 
-          // For other days in x_times_per_week, don't mark as missed
-          return 'bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-300';
+          // Count completions for this week
+          let weekCompletions = 0;
+          completionDateObjects.forEach(completionDate => {
+            const completionWeekStart = new Date(completionDate);
+            completionWeekStart.setDate(completionDate.getDate() - completionDate.getDay());
+
+            // If the completion is in the same week as our date
+            if (completionWeekStart.getTime() === weekStart.getTime()) {
+              weekCompletions++;
+            }
+          });
+
+          // If it's a past week and we didn't complete enough times
+          if (isPastWeek && weekCompletions < timesPerWeek && weekStart >= loopStartDate) {
+            // Mark all days in past weeks as missed if not enough completions
+            return '!bg-red-600 dark:!bg-red-800 !text-white dark:!text-white';
+          }
+
+          // For current week or future weeks, mark as inactive
+          return 'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-500 opacity-50';
         }
 
         // For daily frequency, mark all days after start date and before today as missed if not completed
