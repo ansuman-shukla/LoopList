@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Try both ports 8000 and 8001 since we might be running on either
-const baseURL = 'http://localhost:8000/api/v1';
+// Use environment variable for API URL or fallback to localhost for development
+const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
 const axiosInstance = axios.create({
   baseURL,
