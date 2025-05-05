@@ -5,8 +5,13 @@ import { getTodayInLocalTimezone } from '../utils/dateUtils';
 export const getLoops = async (status = null, skip = 0, limit = 10) => {
   try {
     console.log(`Fetching loops with status: ${status || 'all'}, skip: ${skip}, limit: ${limit}`);
+    console.log(`Timestamp: ${new Date().toISOString()}`); // Add timestamp for debugging
     const params = { skip, limit };
     if (status) params.status = status;
+
+    // Add cache-busting parameter to prevent browser caching
+    params._t = new Date().getTime();
+
     const response = await axiosInstance.get('/loops', { params });
 
     // Enhanced debug logging

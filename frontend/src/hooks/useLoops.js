@@ -16,6 +16,9 @@ export const useLoops = (status = null, page = 0, limit = 10) => {
     queryFn: () => getLoops(status, page * limit, limit),
     staleTime: 1000 * 60 * 5, // 5 minutes
     keepPreviousData: true,
+    refetchOnMount: true, // Always refetch when component mounts
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    cacheTime: 1000 * 60 * 10, // Keep in cache for 10 minutes
   });
 };
 

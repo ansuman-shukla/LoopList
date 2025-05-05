@@ -24,6 +24,8 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
+      refetchOnMount: 'always', // Always refetch when component mounts
+      cacheTime: 1000 * 60 * 10, // Keep in cache for 10 minutes
     },
   },
 })
