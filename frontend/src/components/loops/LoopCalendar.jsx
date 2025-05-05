@@ -227,7 +227,12 @@ const LoopCalendar = ({ loopId }) => {
             return '!bg-red-600 dark:!bg-red-800 !text-white dark:!text-white';
           }
 
-          // For current week or future weeks, mark as inactive
+          // For current week, mark as neutral unless completed (which is handled above)
+          if (isCurrentWeek) {
+            return 'bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-300';
+          }
+
+          // For future weeks, mark as inactive
           return 'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-500 opacity-50';
         }
 

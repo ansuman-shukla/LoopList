@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useLoops, useCompleteLoop } from '../hooks/useLoops';
 import { useAuth } from '../hooks/useAuth';
@@ -9,32 +9,72 @@ import LoopCard from '../components/loops/LoopCard';
 const Dashboard = () => {
   const { user } = useAuth();
   const [activeStatus, setActiveStatus] = useState('active');
-  const { data: loops = [], isLoading, error } = useLoops(activeStatus);
+  const [page, setPage] = useState(0);
+  const [allLoops, setAllLoops] = useState([]);
+  const limit = 12; // Number of loops to load per page
+  const loaderRef = useRef(null);
+  const [hasMore, setHasMore] = useState(true);
+
+  const { data: loops = [], isLoading, error, isFetching } = useLoops(activeStatus, page, limit);
   const completeLoopMutation = useCompleteLoop();
 
   // Enhanced debug logging
   console.log('Current user:', user);
   console.log('User ID:', user?.id);
   console.log('Active status:', activeStatus);
+  console.log('Page:', page);
   console.log('Loops data:', loops);
+  console.log('All loops:', allLoops);
   console.log('Is loading:', isLoading);
+  console.log('Is fetching:', isFetching);
   console.log('Error:', error);
+  console.log('Has more:', hasMore);
 
-  // Check if loops array is empty
-  if (loops.length === 0) {
-    console.log('No loops found in the data');
-  } else {
-    console.log(`Found ${loops.length} loops`);
-    loops.forEach((loop, index) => {
-      console.log(`Loop ${index + 1}:`, loop);
-      console.log(`Loop ${index + 1} ID:`, loop.id || loop._id);
-      console.log(`Loop ${index + 1} user_id:`, loop.user_id);
-      console.log(`Loop ${index + 1} status:`, loop.status);
-      console.log(`Loop ${index + 1} reaction_count:`, loop.reaction_count);
-      console.log(`Loop ${index + 1} reaction_count type:`, typeof loop.reaction_count);
-      console.log(`Loop ${index + 1} visibility:`, loop.visibility);
-    });
-  }
+  // Update allLoops when new data is fetched
+  useEffect(() => {
+    if (loops) {
+      if (loops.length < limit) {
+        setHasMore(false);
+      }
+
+      if (page === 0) {
+        setAllLoops(loops);
+      } else {
+        setAllLoops(prev => [...prev, ...loops]);
+      }
+    }
+  }, [loops, page, limit]);
+
+  // Reset pagination when status changes
+  useEffect(() => {
+    setPage(0);
+    setAllLoops([]);
+    setHasMore(true);
+  }, [activeStatus]);
+
+  // Infinite scroll implementation
+  const handleObserver = useCallback((entries) => {
+    const [target] = entries;
+    if (target.isIntersecting && hasMore && !isFetching) {
+      setPage(prev => prev + 1);
+    }
+  }, [hasMore, isFetching]);
+
+  useEffect(() => {
+    const option = {
+      root: null,
+      rootMargin: '20px',
+      threshold: 0
+    };
+
+    const observer = new IntersectionObserver(handleObserver, option);
+
+    if (loaderRef.current) observer.observe(loaderRef.current);
+
+    return () => {
+      if (loaderRef.current) observer.unobserve(loaderRef.current);
+    };
+  }, [handleObserver]);
 
   const handleComplete = (loopId) => {
     try {
@@ -68,7 +108,7 @@ const Dashboard = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading && page === 0) {
     return (
       <div className="flex justify-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
@@ -76,7 +116,7 @@ const Dashboard = () => {
     );
   }
 
-  if (error) {
+  if (error && page === 0) {
     return (
       <Card className="bg-red-50 border border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
         <h3 className="text-lg font-semibold mb-2">Error Loading Loops</h3>
@@ -147,7 +187,7 @@ const Dashboard = () => {
       </div>
 
       {/* Loops Grid */}
-      {loops.length === 0 ? (
+      {allLoops.length === 0 && !isLoading ? (
         <Card className="text-center py-12">
           <div className="text-4xl mb-4">🔍</div>
           <h3 className="text-xl font-semibold mb-2">No Loops Found</h3>
@@ -163,16 +203,34 @@ const Dashboard = () => {
           )}
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loops.map(loop => (
-            <LoopCard
-              key={loop.id}
-              loop={loop}
-              onComplete={handleComplete}
-              showReactions={false}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {allLoops.map(loop => (
+              <LoopCard
+                key={loop.id || loop._id}
+                loop={loop}
+                onComplete={handleComplete}
+                showReactions={false}
+              />
+            ))}
+          </div>
+
+          {/* Loading indicator for infinite scroll */}
+          {hasMore && (
+            <div ref={loaderRef} className="flex justify-center py-8 mt-4">
+              {isFetching && (
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-600"></div>
+              )}
+            </div>
+          )}
+
+          {/* End of content message */}
+          {!hasMore && allLoops.length > 0 && (
+            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+              <p>You've reached the end of your loops</p>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

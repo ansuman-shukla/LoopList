@@ -5,14 +5,14 @@ import { useAuth } from '../../hooks/useAuth';
 const Sidebar = () => {
   const { user } = useAuth();
   const location = useLocation();
-  
+
   const isActive = (path) => {
     return location.pathname === path;
   };
-  
+
   const navItems = [
-    { 
-      path: '/dashboard', 
+    {
+      path: '/dashboard',
       label: 'Dashboard',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -20,26 +20,35 @@ const Sidebar = () => {
         </svg>
       )
     },
-    { 
-      path: '/loops/create', 
-      label: 'Create Loop',
+    {
+      path: '/friends',
+      label: 'Friends',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+          <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
         </svg>
       )
     },
-    { 
-      path: '/leaderboard', 
+    {
+      path: '/leaderboard',
       label: 'Leaderboard',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
           <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
         </svg>
       )
+    },
+    {
+      path: '/loops/create',
+      label: 'Create Loop',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+        </svg>
+      )
     }
   ];
-  
+
   return (
     <aside className="w-64 bg-white dark:bg-gray-800 shadow-md h-full">
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -53,7 +62,7 @@ const Sidebar = () => {
           </div>
         </div>
       </div>
-      
+
       <nav className="p-4">
         <ul className="space-y-2">
           {navItems.map((item) => (

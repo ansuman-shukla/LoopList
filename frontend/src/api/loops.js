@@ -1,11 +1,12 @@
 import axiosInstance from './axios';
 import { getTodayInLocalTimezone } from '../utils/dateUtils';
 
-// Get all loops for the current user
-export const getLoops = async (status = null) => {
+// Get loops for the current user with pagination
+export const getLoops = async (status = null, skip = 0, limit = 10) => {
   try {
-    console.log(`Fetching loops with status: ${status || 'all'}`);
-    const params = status ? { status } : {};
+    console.log(`Fetching loops with status: ${status || 'all'}, skip: ${skip}, limit: ${limit}`);
+    const params = { skip, limit };
+    if (status) params.status = status;
     const response = await axiosInstance.get('/loops', { params });
 
     // Enhanced debug logging

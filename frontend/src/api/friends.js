@@ -1,8 +1,10 @@
 import axiosInstance from './axios';
 
-// Get all friends
-export const getFriends = async () => {
-  const response = await axiosInstance.get('/friends/me/friends');
+// Get friends with pagination
+export const getFriends = async (skip = 0, limit = 10) => {
+  const response = await axiosInstance.get('/friends/me/friends', {
+    params: { skip, limit }
+  });
   return response.data;
 };
 

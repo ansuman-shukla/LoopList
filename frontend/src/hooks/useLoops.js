@@ -10,11 +10,12 @@ import {
   getCompletionCount
 } from '../api/loops';
 
-export const useLoops = (status = null) => {
+export const useLoops = (status = null, page = 0, limit = 10) => {
   return useQuery({
-    queryKey: ['loops', { status }],
-    queryFn: () => getLoops(status),
+    queryKey: ['loops', { status, page, limit }],
+    queryFn: () => getLoops(status, page * limit, limit),
     staleTime: 1000 * 60 * 5, // 5 minutes
+    keepPreviousData: true,
   });
 };
 

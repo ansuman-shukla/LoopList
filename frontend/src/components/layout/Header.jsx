@@ -64,9 +64,24 @@ const Header = () => {
             <Link to="/" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
               Home
             </Link>
-            <Link to="/leaderboard" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
-              Leaderboard
-            </Link>
+
+            {isAuthenticated ? (
+              <>
+                <Link to="/dashboard" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+                  Dashboard
+                </Link>
+                <Link to="/friends" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+                  Friends
+                </Link>
+                <Link to="/leaderboard" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+                  Leaderboard
+                </Link>
+              </>
+            ) : (
+              <Link to="/leaderboard" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+                Leaderboard
+              </Link>
+            )}
 
             {/* Dark Mode Toggle */}
             <button
@@ -86,21 +101,13 @@ const Header = () => {
             </button>
 
             {isAuthenticated ? (
-              <>
-                <Link to="/dashboard" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
-                  Dashboard
-                </Link>
-                <Link to="/friends" className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
-                  Friends
-                </Link>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </Button>
-              </>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
             ) : (
               <>
                 <Link to="/login">
@@ -135,13 +142,40 @@ const Header = () => {
               >
                 Home
               </Link>
-              <Link
-                to="/leaderboard"
-                className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Leaderboard
-              </Link>
+
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    to="/dashboard"
+                    className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    to="/friends"
+                    className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Friends
+                  </Link>
+                  <Link
+                    to="/leaderboard"
+                    className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Leaderboard
+                  </Link>
+                </>
+              ) : (
+                <Link
+                  to="/leaderboard"
+                  className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Leaderboard
+                </Link>
+              )}
 
               {/* Dark Mode Toggle - Mobile */}
               <button
@@ -165,32 +199,16 @@ const Header = () => {
               </button>
 
               {isAuthenticated ? (
-                <>
-                  <Link
-                    to="/dashboard"
-                    className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    to="/friends"
-                    className="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Friends
-                  </Link>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      handleLogout();
-                      setMobileMenuOpen(false);
-                    }}
-                  >
-                    Logout
-                  </Button>
-                </>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    handleLogout();
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  Logout
+                </Button>
               ) : (
                 <>
                   <Link
