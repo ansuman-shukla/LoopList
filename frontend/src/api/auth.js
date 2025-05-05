@@ -4,13 +4,13 @@ export const login = async (email, password) => {
   const formData = new FormData();
   formData.append('username', email); // FastAPI OAuth2 expects 'username'
   formData.append('password', password);
-  
+
   const response = await axiosInstance.post('/auth/login', formData, {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
   });
-  
+
   return response.data;
 };
 

@@ -48,7 +48,7 @@ axiosInstance.interceptors.response.use(
 
         // Redirect to login page if token is invalid or expired
         localStorage.removeItem('token');
-        window.location.href = '/login';
+        window.location.href = '/#/login';
       }
 
       // Add specific handling for other status codes if needed

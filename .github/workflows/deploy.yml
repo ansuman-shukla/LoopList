@@ -27,6 +27,7 @@ jobs:
       - name: Build
         run: |
           cd frontend
+          echo "VITE_API_URL=https://looplist.onrender.com/api/v1" > .env.production
           npm run build
 
       - name: Deploy
